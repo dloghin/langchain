@@ -30,25 +30,40 @@ def parse_ai_message_to_tool_action(
     if message.tool_calls:
         tool_calls = message.tool_calls
     else:
-        if not message.additional_kwargs.get("tool_calls"):
-            return AgentFinish(
-                return_values={"output": message.content}, log=str(message.content)
-            )
         # Best-effort parsing
         tool_calls = []
-        for tool_call in message.additional_kwargs["tool_calls"]:
-            function = tool_call["function"]
-            function_name = function["name"]
+        # this what llama3-groq-tool-use returns
+        if "<tool_call>" in message.content:
+            tc = message.content.replace("<tool_call>\n", "").replace("\n</tool_call>", "")
             try:
-                args = json.loads(function["arguments"] or "{}")
+                tcj = json.loads(tc)
                 tool_calls.append(
-                    ToolCall(name=function_name, args=args, id=tool_call["id"])
+                    ToolCall(name=tcj["name"], args=tcj["arguments"], id="call_{}".format(tcj["id"]))
                 )
             except JSONDecodeError:
-                raise OutputParserException(
-                    f"Could not parse tool input: {function} because "
-                    f"the `arguments` is not valid JSON."
+                    raise OutputParserException(
+                        f"Could not parse tool input: {function} because "
+                        f"the `arguments` is not valid JSON."
+                    )
+        else:
+            if not message.additional_kwargs.get("tool_calls"):
+                return AgentFinish(
+                    return_values={"output": message.content}, log=str(message.content)
                 )
+
+            for tool_call in message.additional_kwargs["tool_calls"]:
+                function = tool_call["function"]
+                function_name = function["name"]
+                try:
+                    args = json.loads(function["arguments"] or "{}")
+                    tool_calls.append(
+                        ToolCall(name=function_name, args=args, id=tool_call["id"])
+                    )
+                except JSONDecodeError:
+                    raise OutputParserException(
+                        f"Could not parse tool input: {function} because "
+                        f"the `arguments` is not valid JSON."
+                    )
     for tool_call in tool_calls:
         # HACK HACK HACK:
         # The code that encodes tool input into Open AI uses a special variable
