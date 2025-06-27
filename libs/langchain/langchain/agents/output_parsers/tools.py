@@ -32,7 +32,7 @@ def parse_ai_message_to_tool_action(
     else:
         # Best-effort parsing
         tool_calls = []
-        # this what llama3-groq-tool-use returns
+        # this is what llama3-groq-tool-use returns
         if "<tool_call>" in message.content:
             tc = message.content.replace("<tool_call>\n", "").replace("\n</tool_call>", "")
             try:
