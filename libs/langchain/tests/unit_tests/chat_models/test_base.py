@@ -113,26 +113,34 @@ def test_configurable() -> None:
             "openai_api_base": None,
             "openai_organization": None,
             "openai_proxy": None,
+            "output_version": "v0",
             "request_timeout": None,
             "max_retries": None,
             "presence_penalty": None,
+            "reasoning": None,
             "reasoning_effort": None,
             "frequency_penalty": None,
+            "include": None,
             "seed": None,
+            "service_tier": None,
             "logprobs": None,
             "top_logprobs": None,
             "logit_bias": None,
             "streaming": False,
             "n": None,
             "top_p": None,
+            "truncation": None,
             "max_tokens": None,
             "tiktoken_model_name": None,
             "default_headers": None,
             "default_query": None,
             "stop": None,
+            "store": None,
             "extra_body": None,
             "include_response_headers": False,
             "stream_usage": False,
+            "use_previous_response_id": False,
+            "use_responses_api": None,
         },
         "kwargs": {
             "tools": [
@@ -172,7 +180,7 @@ def test_configurable_with_default() -> None:
     for method in ("get_num_tokens", "get_num_tokens_from_messages", "dict"):
         assert hasattr(model, method)
 
-    assert model.model_name == "gpt-4o"  # type: ignore[attr-defined]
+    assert model.model_name == "gpt-4o"
 
     model_with_tools = model.bind_tools(
         [{"name": "foo", "description": "foo", "parameters": {}}]
@@ -191,8 +199,10 @@ def test_configurable_with_default() -> None:
             "name": None,
             "disable_streaming": False,
             "model": "claude-3-sonnet-20240229",
+            "mcp_servers": None,
             "max_tokens": 1024,
             "temperature": None,
+            "thinking": None,
             "top_k": None,
             "top_p": None,
             "default_request_timeout": None,
@@ -200,6 +210,7 @@ def test_configurable_with_default() -> None:
             "stop_sequences": None,
             "anthropic_api_url": "https://api.anthropic.com",
             "anthropic_api_key": SecretStr("bar"),
+            "betas": None,
             "default_headers": None,
             "model_kwargs": {},
             "streaming": False,

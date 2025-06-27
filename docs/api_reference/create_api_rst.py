@@ -528,7 +528,12 @@ def _get_package_version(package_dir: Path) -> str:
             "Aborting the build."
         )
         exit(1)
-    return pyproject["tool"]["poetry"]["version"]
+    try:
+        # uses uv
+        return pyproject["project"]["version"]
+    except KeyError:
+        # uses poetry
+        return pyproject["tool"]["poetry"]["version"]
 
 
 def _out_file_path(package_name: str) -> Path:
@@ -658,6 +663,7 @@ def main(dirs: Optional[list] = None) -> None:
             dir_
             for dir_ in os.listdir(ROOT_DIR / "libs")
             if dir_ not in ("cli", "partners", "packages.yml")
+            and "pyproject.toml" in os.listdir(ROOT_DIR / "libs" / dir_)
         ]
         dirs += [
             dir_
